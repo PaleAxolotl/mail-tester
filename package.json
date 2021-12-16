@@ -1,0 +1,25 @@
+{
+  "name": "mail-tester",
+  "version": "0.0.1",
+  "description": "tool to send emails",
+  "main": "src/index.ts",
+  "repository": "git@github.com:PaleAxolotl/mail-tester.git",
+  "author": "Elias Mawa <elias@emawa.io>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "send": "node build/index.js",
+    "watch": "nodemon --watch src/ --ext ts --exec 'yarn build'",
+    "test": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@types/nodemailer": "^6.4.4",
+    "nodemailer": "^6.7.2",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
