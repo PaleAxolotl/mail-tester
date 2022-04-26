@@ -9,8 +9,8 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "send": "node build/index.js",
-    "watch": "nodemon --watch src/ --ext ts --exec 'yarn build'",
+    "send": "node dist/index.js",
+    "watch": "nodemon --watch src/ --ext ts --exec 'yarn dist'",
     "test": "ts-node src/index.ts"
   },
   "dependencies": {

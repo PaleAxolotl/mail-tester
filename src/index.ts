@@ -2,18 +2,17 @@ import nodemailer from "nodemailer";
 import { readFileSync } from "fs";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 
-const create = async () => {
+import { gen_cool_word, gen_crazy_word } from "./words";
+import { get_current_day, get_current_month } from "./time_util";
+
+const create_connection = async () => {
   let testAccount = !!process.env.SMTP_USER
     ? { user: "", pass: "" }
     : await nodemailer.createTestAccount();
-
   const auth = {
     user: !!process.env.SMTP_USER ? process.env.SMTP_USER : testAccount.user,
     pass: !!process.env.SMTP_PASS ? process.env.SMTP_PASS : testAccount.pass,
   };
-
-  console.log(auth);
-
   return {
     auth,
     transporter: nodemailer.createTransport({
@@ -23,38 +22,43 @@ const create = async () => {
       port:
         parseInt(!!process.env.SMTP_PORT ? process.env.SMTP_PORT : "587") ??
         587,
-      secure: !!process.env.TLS,
+      secure: false,
       auth,
     }),
   };
 };
 
-const send = async ({
+const send_email = async ({
   auth,
   transporter,
 }: {
   auth: { user: string; pass: string };
   transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo>;
 }) => {
-  const testEmail = readFileSync("./test-mail.html");
+  const subject = `${get_current_month()}, ${get_current_day()} - a ${gen_crazy_word()} yet ${gen_cool_word} email`;
+  const testEmail = readFileSync("./emails/test-mail.html");
   return await transporter.sendMail({
     from: !!process.env.SMTP_USER ? process.env.SMTP_USER : auth.user,
     to: process.env.RECV_USER ?? "",
-    subject: "an email from the wild wild web 🤠",
-    text: "Howdy there partner :)",
+    subject,
     html: testEmail,
   });
 };
 
 const sendEmail = async () => {
-  const transporter = await create();
-  const info = await send(transporter);
-
-  console.log("Message ID: %s", info.messageId);
-  console.log("Preview: %s", nodemailer.getTestMessageUrl(info));
+  await create_connection().then((transporter) => {
+    send_email(transporter).then((status) => {
+      console.log("Message ID: %s", status.messageId);
+      console.log("Preview: %s", nodemailer.getTestMessageUrl(status));
+    });
+  });
 };
 
-sendEmail().catch((err) => {
-  console.log(err);
-  console.log("yikes error...");
-});
+sendEmail()
+  .catch((err) => {
+    console.log(err);
+    console.log("yikes error...");
+  })
+  .finally(() => {
+    console.log("done");
+  });
